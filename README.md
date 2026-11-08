@@ -1,45 +1,44 @@
 # IEEE 33-Bus Distribution Network Study
 
-I used Python and [pandapower](https://www.pandapower.org/) to study how changes in electricity demand and local solar generation affect a distribution feeder.
+I used Python and pandapower to see how electricity demand and solar generation affect the voltages and losses in a distribution network. I started with the standard IEEE 33-bus feeder and then tested different solar locations.
 
-The model is the IEEE 33-bus test system available through `pandapower.networks.case33bw()`.
+![IEEE 33-bus feeder](results/figures/ieee33_bus_topology.png)
 
-![IEEE 33-bus radial distribution feeder topology](results/figures/ieee33_bus_topology.png)
+*The buses are numbered 1–33 here. In the Python scripts, Bus 18 is index 17.*
 
-*Feeder layout with buses numbered 1–33. In the Python code, bus indices start at 0, so Bus 18 is index 17. The diagram shows the main feeder and its lateral branches; it is not a geographic map.*
+## Experiments
 
-## What I did
-
-- Ran the base-case power flow and plotted the voltage at each bus.
-- Increased the loads to 125%, 150% and 175% of their original values to see how voltages and line losses changed.
-- Added a solar generator at Bus 18 and tested outputs of 0.25, 0.5, 1 and 1.5 MW.
-- Added a simple comparison script for solar at Buses 2–33, using four solar sizes at each location (Experiment 3; results not yet checked).
-
-For each case, I looked at bus voltages, the lowest-voltage bus and total line losses.
+| Experiment | What I tested |
+| --- | --- |
+| 1. Load growth | Original demand, then 125%, 150% and 175% |
+| 2. Solar at Bus 18 | 0, 0.25, 0.5, 1 and 1.5 MW |
+| 3. Solar placement | Four solar sizes (0.25, 0.5, 1 and 1.5 MW) at every bus from 2 to 33 — 128 cases |
 
 ## Results
 
-As demand increased, the minimum bus voltage dropped and line losses increased.
+**Load growth:** Increasing demand made the voltage drop worse and raised line losses. At 100% demand, the lowest voltage was 0.9131 p.u. and line losses were 202.7 kW. At 175%, these changed to 0.8364 p.u. and 708.7 kW.
 
-Adding solar at Bus 18 initially reduced line losses. Of the five outputs I tested, **1 MW gave the lowest losses**, from about **203 kW without solar to 146 kW** (roughly 28% lower). At 1.5 MW the losses increased again.
+**Solar at Bus 18:** With 1 MW of generation, line losses decreased from 202.7 kW to 145.8 kW (about 28% lower). Increasing the output to 1.5 MW raised the losses again. Some buses still had low voltages.
 
-The solar generator improved voltages near Bus 18, but some buses were still below the 0.95 p.u. reference. So reducing losses and fixing low voltage are not necessarily the same problem.
+![Line losses with solar at Bus 18](results/figures/solar_line_losses_regenerated.png)
 
-![Line losses at different solar outputs](results/figures/solar_line_losses.svg)
+**Comparing all buses:** I then ran 128 bus-and-size combinations. The lowest line loss I found was **116.4 kW at Bus 29 with 1.5 MW solar**, about **42.6% below the no-solar case**. Bus 8 with 1.5 MW was very close at 116.5 kW.
 
-![Minimum and maximum voltages](results/figures/solar_voltage_limits.svg)
+![Lowest tested loss at each bus](results/figures/solar_placement_comparison.png)
 
-*The two charts above use rounded values from my initial simulation plots. The scripts generate plots and full-precision CSV results when run locally.*
+There's a catch: even at Bus 29, the minimum voltage was **0.9357 p.u.**, with **7 buses below 0.95 p.u.** None of the 128 cases met the entire 0.95–1.05 p.u. voltage range. So the lowest-loss option is **not** a voltage-compliant design.
 
-## Running the code
+The exact figures are saved in [the results CSV files](results/), including [all 128 placement cases](results/solar_placement_results.csv).
 
-Install the packages:
+## How to run
+
+Install the Python packages:
 
 ```bash
 python -m pip install -r requirements.txt
 ```
 
-Run the scripts from the main project folder:
+Run these from the main project folder:
 
 ```bash
 python src/baseline.py
@@ -48,14 +47,12 @@ python src/solar_integration.py
 python src/solar_optimization.py
 ```
 
-They print results and save plots and CSV files in `results/`.
-
-The last script runs 128 cases: 32 possible installation buses and four solar sizes (0.25, 0.5, 1 and 1.5 MW). It prints a results table and saves one bar chart comparing line losses. It also checks whether any tested case meets the 0.95–1.05 p.u. voltage range. This compares 128 selected bus-and-size combinations, not every possible solar capacity or a complete engineering design.
+Each script saves its results in `results/`. The last script prints a table of all 128 cases and makes the bar chart shown above.
 
 ## Notes
 
-Solar is represented as a fixed power injection at unity power factor, not as a detailed PV panel and inverter model. I used 0.95–1.05 p.u. as a voltage reference for the comparisons.
+This is a **steady-state power-flow study**, not a physical solar installation. I modelled solar as a fixed active-power injection at unity power factor, and used 0.95–1.05 p.u. as the voltage reference for comparison. I haven't tested inverter dynamics, changing sunlight, or equipment thermal limits.
 
-I have run the 128-case placement comparison locally. The script generates `results/figures/solar_placement_comparison.png`; the graph still needs to be committed here along with the CSV results.
+The best result is only the best **among the four solar sizes tested at each bus**, not a proven global optimum. I also haven't tried multiple solar generators or reactive-power control yet.
 
-More details are in [docs/findings.md](docs/findings.md).
+More background and the experiment notes are in [docs/findings.md](docs/findings.md).
