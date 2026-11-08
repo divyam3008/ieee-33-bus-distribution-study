@@ -13,6 +13,7 @@ The model is the IEEE 33-bus test system available through `pandapower.networks.
 - Ran the base-case power flow and plotted the voltage at each bus.
 - Increased the loads to 125%, 150% and 175% of their original values to see how voltages and line losses changed.
 - Added a solar generator at Bus 18 and tested outputs of 0.25, 0.5, 1 and 1.5 MW.
+- Added a script to scan different bus locations and solar sizes (Experiment 3; results still need to be run and reviewed).
 
 For each case, I looked at bus voltages, the lowest-voltage bus and total line losses.
 
@@ -44,14 +45,17 @@ Run the scripts from the main project folder:
 python src/baseline.py
 python src/load_growth_analysis.py
 python src/solar_integration.py
+python src/solar_optimization.py
 ```
 
-They print the results and save plots and CSV files in `results/`.
+They print results and save plots and CSV files in `results/`.
+
+The last script tests solar output from 0.05 to 1.5 MW, in 0.05 MW steps, at each non-slack bus (960 combinations). It prints the lowest-loss result separately from cases meeting the 0.95–1.05 p.u. voltage band. If the test feeder has missing line-current ratings, it will not claim a fully constraint-compliant solution. For a quicker first run, use `python src/solar_optimization.py --step 0.25`.
 
 ## Notes
 
 Solar is represented as a fixed power injection at unity power factor, not as a detailed PV panel and inverter model. I used 0.95–1.05 p.u. as a voltage reference for the comparisons.
 
-Next, I want to compare different buses and solar sizes to see whether another location gives lower losses and a better voltage profile.
+The placement-and-sizing script is now included. I still need to run its full sweep, check the results, and compare the best locations with Bus 18.
 
 More details are in [docs/findings.md](docs/findings.md).
