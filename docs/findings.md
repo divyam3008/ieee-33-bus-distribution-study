@@ -35,7 +35,7 @@ Among these five outputs, 1 MW gave the lowest line losses (about 28.1% below ba
 
 ## Experiment 3: comparing all solar locations
 
-I tried Buses 2–33, excluding the main grid/slack bus, at four solar outputs: 0.25, 0.5, 1 and 1.5 MW. That made 128 separate power-flow cases.
+I tried Buses 2–33, excluding the main grid/slack bus, at four solar outputs: 0.25, 0.5, 1 and 1.5 MW. That made 128 separate power-flow cases. I reused the same network model, changing only the generator bus and active-power output between runs.
 
 - Lowest line losses among the tested cases: **Bus 29, 1.5 MW, 116.384 kW**.
 - Reduction from 202.677 kW baseline: **42.6%**.
@@ -55,7 +55,7 @@ So Bus 29 at 1.5 MW is the lowest-loss case in this grid search, **not** an acce
 - Demand is scaled proportionally in Experiment 1.
 - Solar is represented as fixed active power with `q_mvar=0`. This isn't a solar-cell, irradiance, battery or inverter dynamics model.
 - The 0.95–1.05 p.u. band is a **chosen study reference**, not an asserted local utility requirement.
-- I did not independently check conductor thermal limits, protection coordination or short-circuit performance.
+- Experiment 3 records the maximum calculated line current, but does not establish thermal compliance: line ampacity ratings have not been independently validated. Transformer limits, protection coordination and short-circuit performance were not assessed.
 - Only four solar sizes were tested. This doesn't establish a mathematically optimal capacity or the best solution under all engineering constraints.
 
 ## Possible next work
