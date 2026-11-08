@@ -1,0 +1,46 @@
+name: Generate power-flow results
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "src/**"
+      - "requirements.txt"
+      - ".github/workflows/generate-results.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  simulations:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out project
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+      - name: Run all four experiments
+        env:
+          MPLBACKEND: Agg
+        run: |
+          python src/baseline.py > results/baseline_terminal_output.txt
+          python src/load_growth_analysis.py > results/load_growth_terminal_output.txt
+          python src/solar_integration.py > results/solar_integration_terminal_output.txt
+          python src/solar_optimization.py > results/solar_placement_terminal_output.txt
+      - name: Commit generated CSV files and plots
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add results/
+          if ! git diff --staged --quiet; then
+            git commit -m "Regenerate 33-bus experiment tables and plots"
+            git push
+          fi
