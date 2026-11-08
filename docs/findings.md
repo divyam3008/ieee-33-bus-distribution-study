@@ -1,23 +1,63 @@
-# Findings, assumptions, and limitations
+# Experiment notes
 
-## 1. Load growth
+These are the results from the Python scripts in this repository. I used `pandapower.networks.case33bw()` and `pp.runpp()` for steady-state AC load flow.
 
-The baseline IEEE 33-bus network already has buses under the illustrative 0.95 p.u. lower voltage reference. Scaling both active and reactive demand to 125%, 150%, and 175% reduces the minimum voltage and increases active line losses. A nearly unchanged number of undervoltage buses does not mean the violations have stopped getting worse.
+## Experiment 1: increasing the demand
 
-## 2. Fixed solar generation at conventional Bus 18
+I multiplied both active (P) and reactive (Q) load by the same factor, so the original load power factors stayed the same.
 
-With a fixed active-power injection at pandapower index 17 (conventional Bus 18), the original plotted results indicate total line losses of roughly 0.203, 0.172, 0.153, 0.146, and 0.172 MW for 0, 0.25, 0.5, 1.0, and 1.5 MW generation. At 1 MW the approximate reduction from baseline is 28%; these are **rounded chart readings** and should be checked with regenerated full-precision output.
+| Demand | Lowest bus voltage | Line losses | Buses below 0.95 p.u. |
+| ---: | ---: | ---: | ---: |
+| 100% | 0.9131 p.u. | 202.7 kW | 21 |
+| 125% | 0.8889 p.u. | 329.9 kW | 21 |
+| 150% | 0.8634 p.u. | 496.4 kW | 21 |
+| 175% | 0.8364 p.u. | 708.7 kW | 23 |
 
-Among **these five tested sizes**, the loss minimum occurred at 1 MW. The network still had voltage below 0.95 p.u. in another feeder branch. Larger injection may increase current on some sections even if it reduces upstream import. Reverse power flow in individual lines is different from net export to the grid.
+The weakest-voltage bus was Bus 18 throughout this experiment. A constant count of low-voltage buses doesn't mean the voltages aren't getting worse.
 
-## 3. Boundaries of interpretation
+[Full table](../results/load_growth_results.csv)
 
-- Balanced steady-state AC power-flow model from `pandapower.networks.case33bw()`.
-- Solar is a fixed active-power injection with `q_mvar=0`, not a time-resolved solar PV module or controlled inverter.
-- The 0.95–1.05 p.u. band is an illustrative project criterion, not a verified utility grid code.
-- The work does **not** claim globally optimal PV placement/capacity, voltage stability analysis, complete line rating validation, or actual grid deployment.
-- Original chart values are rounded; reproduce numerical values locally with the scripts before using exact numbers in a CV or report.
+## Experiment 2: solar added at Bus 18
 
-## 4. Next development
+Solar was modelled with `pp.create_sgen()` using `q_mvar=0`.
 
-Test alternative buses and a finer capacity sweep. Define an objective (e.g., lowest line losses) with voltage and loading constraints. If the single-generator feasible set is empty, report that and investigate reactive support or multi-site generation rather than ignoring constraints.
+| Solar output | Line losses | Lowest voltage | Buses below 0.95 p.u. |
+| ---: | ---: | ---: | ---: |
+| 0 MW | 202.7 kW | 0.9131 | 21 |
+| 0.25 MW | 172.2 kW | 0.9207 | 18 |
+| 0.5 MW | 153.4 kW | 0.9245 | 15 |
+| 1.0 MW | 145.8 kW | 0.9316 | 6 |
+| 1.5 MW | 172.0 kW | 0.9379 | 5 |
+
+Among these five outputs, 1 MW gave the lowest line losses (about 28.1% below baseline). More generation did not always reduce losses. With solar at Bus 18, the weakest bus also shifted to Bus 33, showing why a network-wide comparison matters.
+
+[Full table](../results/solar_integration_results.csv)
+
+## Experiment 3: comparing all solar locations
+
+I tried Buses 2–33, excluding the main grid/slack bus, at four solar outputs: 0.25, 0.5, 1 and 1.5 MW. That made 128 separate power-flow cases.
+
+- Lowest line losses among the tested cases: **Bus 29, 1.5 MW, 116.384 kW**.
+- Reduction from 202.677 kW baseline: **42.6%**.
+- Very close result: **Bus 8, 1.5 MW, 116.499 kW**.
+- Minimum voltage for Bus 29 / 1.5 MW: **0.9357 p.u.**, with **7 buses below 0.95 p.u.**
+- **No tested case** met 0.95–1.05 p.u. at every bus.
+
+So Bus 29 at 1.5 MW is the lowest-loss case in this grid search, **not** an acceptable final design under the voltage reference. The bar chart shows the minimum loss achieved at each bus from the four outputs I tested.
+
+![Best tested line losses at each bus](../results/figures/solar_placement_comparison.png)
+
+[All 128 cases (CSV)](../results/solar_placement_results.csv)
+
+## Assumptions and limitations
+
+- IEEE 33-bus feeder from pandapower, using a steady-state AC power-flow calculation.
+- Demand is scaled proportionally in Experiment 1.
+- Solar is represented as fixed active power with `q_mvar=0`. This isn't a solar-cell, irradiance, battery or inverter dynamics model.
+- The 0.95–1.05 p.u. band is a **chosen study reference**, not an asserted local utility requirement.
+- I did not independently check conductor thermal limits, protection coordination or short-circuit performance.
+- Only four solar sizes were tested. This doesn't establish a mathematically optimal capacity or the best solution under all engineering constraints.
+
+## Possible next work
+
+I could test more solar sizes near the lowest-loss cases, look at reactive-power support or try more than one installation site. Those aren't part of the completed experiments yet.
