@@ -47,11 +47,11 @@ python src/solar_integration.py
 python src/solar_optimization.py
 ```
 
-Each script saves its results in `results/`. The last script prints a table of all 128 cases and makes the bar chart shown above.
+Each script saves its results in `results/`. The last script prints a table of all 128 cases and makes the bar chart shown above. It also records the highest line current in each case; this is not the same as checking a thermal rating.
 
 ## Notes
 
-This is a **steady-state power-flow study**, not a physical solar installation. I modelled solar as a fixed active-power injection at unity power factor, and used 0.95–1.05 p.u. as the voltage reference for comparison. I haven't tested inverter dynamics, changing sunlight, or equipment thermal limits.
+This is a **steady-state power-flow study**, not a physical solar installation. I modelled solar as a fixed active-power injection at unity power factor, and used 0.95–1.05 p.u. as the voltage reference for comparison. I haven't tested inverter dynamics or changing sunlight. Line currents are calculated in Experiment 3, but I haven't validated thermal ratings or overload limits.
 
 The best result is only the best **among the four solar sizes tested at each bus**, not a proven global optimum. I also haven't tried multiple solar generators or reactive-power control yet.
 
