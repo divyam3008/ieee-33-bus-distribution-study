@@ -23,4 +23,4 @@ python src/solar_integration.py
 python src/solar_optimization.py
 ```
 
-The placement output contains all four capacities at each bus from 2 to 33. The best-case selection is based on **losses only**; no 128-case result satisfies the 0.95–1.05 p.u. voltage-reference band.
+The placement output contains all four capacities at each bus from 2 to 33. It also records the maximum calculated line current in each run, **not** a verified line-loading percentage or thermal pass/fail. The best-case selection is based on **losses only**; no 128-case result satisfies the 0.95–1.05 p.u. voltage-reference band.
