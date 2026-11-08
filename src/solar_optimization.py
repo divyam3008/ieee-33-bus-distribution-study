@@ -19,17 +19,19 @@ base_net = pn.case33bw()
 pp.runpp(base_net, numba=False)
 original_losses = base_net.res_line.pl_mw.sum() * 1000
 
-results = []
+# Reuse one network instead of rebuilding it for all 128 cases.
+# We only change the solar generator's location and output.
+net = pn.case33bw()
+generator = pp.create_sgen(net, bus=1, p_mw=0.0,
+                           q_mvar=0.0, name="Solar generator")
 
+results = []
 for bus in buses_to_test:
     for solar_power in solar_sizes:
-        # Start with the original network every time
-        net = pn.case33bw()
-
-        # Python bus indices start at 0: Bus 18 -> index 17
-        pp.create_sgen(net, bus=bus - 1, p_mw=solar_power,
-                       q_mvar=0, name="Solar generator")
-        pp.runpp(net, numba=False)
+        # Python bus indices start at 0: conventional Bus 18 -> index 17.
+        net.sgen.at[generator, "bus"] = bus - 1
+        net.sgen.at[generator, "p_mw"] = solar_power
+        pp.runpp(net, numba=False, init="flat")
 
         voltages = net.res_bus.vm_pu
         losses = net.res_line.pl_mw.sum() * 1000  # kW
@@ -44,6 +46,7 @@ for bus in buses_to_test:
             "Maximum voltage": round(voltages.max(), 4),
             "Buses below 0.95": low_buses,
             "Buses above 1.05": high_buses,
+            "Max line current (kA)": round(net.res_line.i_ka.max(), 5),
         })
 
 df = pd.DataFrame(results)
@@ -59,6 +62,8 @@ print(f"Bus {int(best['Bus'])}, {best['Solar (MW)']} MW")
 print(f"Losses: {best['Losses (kW)']:.2f} kW (baseline {original_losses:.2f} kW)")
 print(f"Loss reduction: {reduction:.1f}%")
 print(f"Minimum bus voltage: {best['Minimum voltage']:.4f} p.u.")
+print(f"Maximum line current: {best['Max line current (kA)']:.5f} kA")
+print("Line thermal limits were not verified: current alone does not establish overload.")
 
 # Is the 0.95 to 1.05 p.u. voltage requirement met?
 valid = df[(df["Buses below 0.95"] == 0) & (df["Buses above 1.05"] == 0)]
