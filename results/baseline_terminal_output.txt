@@ -1,0 +1,6 @@
+IEEE 33-bus feeder — baseline
+Number of buses: 33
+Minimum voltage: 0.9131 p.u., at bus 18
+Maximum voltage: 1.0000 p.u.
+Buses under 0.95 p.u.: 21
+Total active line loss: 0.2027 MW

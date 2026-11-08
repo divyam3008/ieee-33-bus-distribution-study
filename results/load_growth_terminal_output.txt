@@ -1,0 +1,7 @@
+
+LOAD-GROWTH RESULTS
+ demand_percent  min_voltage_pu  weakest_bus_1_based  buses_below_095  line_losses_mw
+            100        0.913090                   18               21        0.202677
+            125        0.888909                   18               21        0.329855
+            150        0.863438                   18               21        0.496351
+            175        0.836441                   18               23        0.708717

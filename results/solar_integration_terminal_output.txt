@@ -1,0 +1,10 @@
+
+SOLAR INTEGRATION RESULTS
+ solar_generation_mw  min_voltage_pu  weakest_bus_1_based  max_voltage_pu  line_losses_mw  buses_below_095  buses_above_105  net_slack_import_mw
+                0.00        0.913090                   18        1.000000        0.202677               21                0             3.917677
+                0.25        0.920669                   33        1.000000        0.172221               18                0             3.637221
+                0.50        0.924508                   33        1.000000        0.153417               15                0             3.368417
+                1.00        0.931567                   33        1.000000        0.145795                6                0             2.860795
+                1.50        0.937933                   33        1.016322        0.172010                5                0             2.387010
+Lowest losses among sampled sizes: 1.00 MW
+Loss reduction vs no-solar case: 28.1%
