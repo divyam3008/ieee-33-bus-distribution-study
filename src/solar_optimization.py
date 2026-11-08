@@ -1,4 +1,4 @@
-"""Experiment 3: compare solar placement at five selected buses."""
+"""Experiment 3: compare solar placement at all 32 non-slack buses."""
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -7,7 +7,7 @@ import pandapower.networks as pn
 from pathlib import Path
 
 # Conventional bus numbers (1 to 33)
-buses_to_test = [6, 12, 18, 25, 33]
+buses_to_test = list(range(2, 34))
 solar_sizes = [0.25, 0.5, 1.0, 1.5]  # MW
 
 folder = Path(__file__).resolve().parents[1] / "results"
@@ -47,7 +47,7 @@ for bus in buses_to_test:
         })
 
 df = pd.DataFrame(results)
-print("\nALL 20 TEST CASES")
+print(f"\nALL {len(df)} TEST CASES")
 print(df.to_string(index=False))
 
 # Find the lowest losses among the combinations we tested
@@ -69,9 +69,9 @@ else:
     print(f"Lowest-loss voltage-compliant case: Bus {int(best_valid['Bus'])}, "
           f"{best_valid['Solar (MW)']} MW")
 
-# Simple graph: best tested loss for each of the five buses
+# Simple graph: best tested loss for each of the 32 buses
 best_per_bus = df.loc[df.groupby("Bus")["Losses (kW)"].idxmin()].sort_values("Bus")
-plt.figure(figsize=(8, 5))
+plt.figure(figsize=(12, 5))
 plt.bar(best_per_bus["Bus"].astype(str), best_per_bus["Losses (kW)"])
 plt.axhline(original_losses, color="red", linestyle="--", label="No solar")
 plt.xlabel("Solar installation bus")
