@@ -4,6 +4,10 @@ I used Python and [pandapower](https://www.pandapower.org/) to study how changes
 
 The model is the IEEE 33-bus test system available through `pandapower.networks.case33bw()`.
 
+![IEEE 33-bus radial distribution feeder topology](results/figures/ieee33_bus_topology.png)
+
+*Feeder layout with buses numbered 1–33. In the Python code, bus indices start at 0, so Bus 18 is index 17. The diagram shows the main feeder and its lateral branches; it is not a geographic map.*
+
 ## What I did
 
 - Ran the base-case power flow and plotted the voltage at each bus.
